@@ -1,4 +1,114 @@
 
+    // Resume Modal and Download Tracking
+    const resumeBtn = document.getElementById('resumeBtn');
+    const resumeModal = document.getElementById('resumeModal');
+    const closeModal = document.getElementById('closeModal');
+    const downloadBtn = document.getElementById('downloadBtn');
+    const downloadCountEl = document.getElementById('downloadCount');
+    const resumeFrame = document.getElementById('resumeFrame');
+    const resumePlaceholder = document.querySelector('.resume-placeholder');
+
+    // Replace this with your actual resume PDF URL
+    const RESUME_URL = 'your-resume.pdf'; // Change this to your PDF filename
+
+    // Load download count from localStorage
+    let downloadCount = parseInt(localStorage.getItem('resume_downloads') || '0');
+    downloadCountEl.textContent = downloadCount;
+
+    // Open modal
+    resumeBtn.onclick = () => {
+      resumeModal.classList.add('active');
+      document.body.style.overflow = 'hidden';
+      
+      // Try to load PDF preview
+      if (RESUME_URL !== 'your-resume.pdf') {
+        resumeFrame.src = RESUME_URL;
+        resumeFrame.style.display = 'block';
+        resumePlaceholder.style.display = 'none';
+      }
+    };
+
+    // Close modal
+    closeModal.onclick = () => {
+      resumeModal.classList.remove('active');
+      document.body.style.overflow = '';
+    };
+
+    // Close on background click
+    resumeModal.onclick = (e) => {
+      if (e.target === resumeModal) {
+        closeModal.click();
+      }
+    };
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && resumeModal.classList.contains('active')) {
+        closeModal.click();
+      }
+    });
+
+    // Download and track
+    downloadBtn.onclick = () => {
+      if (RESUME_URL === 'your-resume.pdf') {
+        alert('Please upload your resume PDF and update the RESUME_URL variable in the script.');
+        return;
+      }
+
+      // Increment download count
+      downloadCount++;
+      localStorage.setItem('resume_downloads', downloadCount.toString());
+      downloadCountEl.textContent = downloadCount;
+
+      // Trigger download
+      const link = document.createElement('a');
+      link.href = RESUME_URL;
+      link.download = 'Albert_Resume.pdf';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Optional: Show success message
+      const originalText = downloadBtn.innerHTML;
+      downloadBtn.innerHTML = '<i class="bx bx-check"></i> Downloaded!';
+      setTimeout(() => {
+        downloadBtn.innerHTML = originalText;
+      }, 2000);
+    };
+
+    // Parallax Effect
+    document.addEventListener('mousemove', (e) => {
+      const shapes = document.querySelectorAll('.parallax-shape');
+      const x = e.clientX / window.innerWidth;
+      const y = e.clientY / window.innerHeight;
+      
+      shapes.forEach((shape, index) => {
+        const speed = (index + 1) * 0.5;
+        const xMove = (x - 0.5) * speed * 50;
+        const yMove = (y - 0.5) * speed * 50;
+        shape.style.transform = `translate(${xMove}px, ${yMove}px)`;
+      });
+    });
+
+    // Scroll-based parallax
+    let ticking = false;
+    window.addEventListener('scroll', () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrolled = window.pageYOffset;
+          const shapes = document.querySelectorAll('.parallax-shape');
+          
+          shapes.forEach((shape, index) => {
+            const speed = (index + 1) * 0.3;
+            shape.style.transform += ` translateY(${scrolled * speed * 0.1}px)`;
+          });
+          
+          ticking = false;
+        });
+        ticking = true;
+      }
+    });
+
     // Theme Toggle (Desktop + Mobile)
     const desktopToggle = document.getElementById('themeToggle');
     const mobileThemeToggle = document.getElementById('mobileThemeToggle');
@@ -113,7 +223,7 @@
       entries.forEach(entry => {
         if (entry.isIntersecting) {
           entry.target.classList.add('visible');
-          animateOnScroll.unobserve(entry.target); // Stop observing after animation
+          animateOnScroll.unobserve(entry.target);
         }
       });
     }, {
@@ -142,10 +252,10 @@
     let apiKey = localStorage.getItem('gemini_api_key') || '';
     let conversationHistory = [];
 
-    const portfolioContext = `You are a helpful assistant for Albert's portfolio website. Albert is a Junior Software Developer specializing in enterprise web systems.
+    const portfolioContext = `You are a helpful assistant for Albert's portfolio website. Albert is a Software Developer specializing in enterprise web systems.
 
 Key Information:
-- Current Role (2024-Present): Junior Software Developer working on Approval Systems, ePMS (KRA-based performance evaluation), and Sales Management tools
+- Current Role (2024-Present): Software Developer working on Approval Systems, ePMS (KRA-based performance evaluation), and Sales Management tools
 - Experience (2023): Built ASP.NET Core MVC systems with authentication, dashboards, Excel import/export, and role-based access
 - Focus: Backend logic, SQL Server performance, and maintainable real-world systems
 
